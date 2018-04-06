@@ -41,6 +41,37 @@ namespace Todos
                 StarPic.Source = ViewModel.SelectedItem.bitmap;
                 // testblock.Text = StarPic.Source.ToString();//debug
             }
+
+            if (e.NavigationMode == NavigationMode.New)
+            {
+                ApplicationData.Current.LocalSettings.Values.Remove("newpage");
+            }
+            else
+            {
+                if (ApplicationData.Current.LocalSettings.Values.ContainsKey("newpage"))
+                {
+                    var composite = ApplicationData.Current.LocalSettings.Values["newpage"] as ApplicationDataCompositeValue;
+                    title.Text = (string)composite["title"];
+                    description.Text = (string)composite["description"];
+                    DatePicker.Date = (DateTimeOffset)composite["date"];
+                    StarPic.Source = new BitmapImage(new Uri("ms-appx://homework/" + (string)composite["image_uri"]));
+                }
+            }
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            bool suspending = ((App)App.Current).isSuspend;
+            if (suspending)
+            {
+                ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
+                //保存多项配置
+                composite["title"] = title.Text;
+                composite["description"] = description.Text;
+                composite["date"] = DatePicker.Date;
+                composite["image_uri"] = StarPic.Source;
+                ApplicationData.Current.LocalSettings.Values["newpage"] = composite;
+            }
         }
 
         private async void checkOut(int stateNum)

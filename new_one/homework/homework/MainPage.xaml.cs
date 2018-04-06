@@ -40,6 +40,36 @@ namespace Todos
             {
                 this.ViewModel = (ViewModels.TodoItemViewModel)(e.Parameter);
             }
+
+            if(e.NavigationMode == NavigationMode.New)
+            {
+                ApplicationData.Current.LocalSettings.Values.Remove("newpage");
+            }
+            else
+            {
+                if(ApplicationData.Current.LocalSettings.Values.ContainsKey("newpage"))
+                {
+                    var composite = ApplicationData.Current.LocalSettings.Values["newpage"] as ApplicationDataCompositeValue;
+                    title_MainPage.Text = (string)composite["title"];
+                    description_MainPage.Text = (string)composite["description"];
+                    DatePicker_MainPage.Date = (DateTimeOffset)composite["date"];
+                    image_MainPage.Source = new BitmapImage(new Uri("ms-appx://homework/"+(string)composite["image_uri"]));
+                }
+            }
+        }
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            bool suspending = ((App)App.Current).isSuspend;
+            if (suspending)
+            {
+                ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
+                //保存多项配置
+                composite["title"] = title_MainPage.Text;
+                composite["description"] = description_MainPage.Text;
+                composite["date"] = DatePicker_MainPage.Date;
+                composite["image_uri"] = image_MainPage.Source;
+                ApplicationData.Current.LocalSettings.Values["newpage"] = composite;
+            }
         }
 
         private void TodoItem_ItemClicked(object sender, ItemClickEventArgs e)

@@ -15,6 +15,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Core;
+using Windows.Storage;
 
 namespace Todos
 {
@@ -29,9 +30,10 @@ namespace Todos
         /// </summary>
         public App()
         {
-            this.InitializeComponent();
+            this.InitializeComponent();// app associate itself with corresponding XAML by calling this method.
             this.Suspending += OnSuspending;
         }
+        public bool isSuspend = false;
 
         /// <summary>
         /// 在应用程序由最终用户正常启动时进行调用。
@@ -56,6 +58,10 @@ namespace Todos
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     //TODO: 从之前挂起的应用程序加载状态
+                    if(ApplicationData.Current.LocalSettings.Values.ContainsKey("NavigationState"))
+                    {
+                        rootFrame.SetNavigationState((string)ApplicationData.Current.LocalSettings.Values["NavigationState"]);
+                    }
                 }
 
                 // 将框架放在当前窗口中
@@ -116,6 +122,9 @@ namespace Todos
         {
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: 保存应用程序状态并停止任何后台活动
+
+            Frame frame = Window.Current.Content as Frame;
+            ApplicationData.Current.LocalSettings.Values["NavigationState"] = frame.GetNavigationState();
             deferral.Complete();
         }
     }
