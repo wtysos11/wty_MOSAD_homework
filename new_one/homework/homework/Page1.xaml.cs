@@ -15,6 +15,7 @@ namespace Todos
         public NewPage()
         {
             this.InitializeComponent();
+            ViewModel = ViewModels.TodoItemViewModel.getInstance();
         }
 
         private ViewModels.TodoItemViewModel ViewModel;
@@ -22,7 +23,6 @@ namespace Todos
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            this.ViewModel = (ViewModels.TodoItemViewModel)(e.Parameter);
             bitmapCache = new BitmapImage(new Uri("ms-appx:///Assets/star.jpg"));
 
             if (ViewModel.SelectedItem == null)
@@ -153,7 +153,7 @@ namespace Todos
             if (ViewModel.SelectedItem != null)
             {
                 ViewModel.RemoveTodoItem(ViewModel.SelectedItem);
-                Frame.Navigate(typeof(MainPage), ViewModel);
+                Frame.Navigate(typeof(MainPage));
             }
         }
         private void CreateButton_Clicked(object sender, RoutedEventArgs e)
@@ -189,7 +189,7 @@ namespace Todos
                 {
                     string timeStr = DatePicker.Date.ToString();
                     ViewModel.AddTodoItem(title.Text, description.Text, timeStr, bitmapCache);
-                    Frame.Navigate(typeof(MainPage), ViewModel);
+                    Frame.Navigate(typeof(MainPage));
                 }
             }
             else
@@ -207,7 +207,7 @@ namespace Todos
             if (ViewModel.SelectedItem != null)
             {
                 ViewModel.UpdateTodoItem(DatePicker.Date.ToString(), title.Text, description.Text);
-                Frame.Navigate(typeof(MainPage), ViewModel);
+                Frame.Navigate(typeof(MainPage));
             }
         }
 

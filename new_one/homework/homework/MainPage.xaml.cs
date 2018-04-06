@@ -18,7 +18,6 @@ using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 
-
 namespace Todos
 {
     public sealed partial class MainPage : Page
@@ -27,20 +26,15 @@ namespace Todos
         public MainPage()
         {
             this.InitializeComponent();
-            this.ViewModel = new ViewModels.TodoItemViewModel();
+            this.ViewModel = ViewModels.TodoItemViewModel.getInstance();
             bitmapCache = new BitmapImage(new Uri("ms-appx:///Assets/star.jpg"));
         }
 
-        ViewModels.TodoItemViewModel ViewModel { get; set; }
+        ViewModels.TodoItemViewModel ViewModel;
         public BitmapImage bitmapCache;
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (e.Parameter.GetType() == typeof(ViewModels.TodoItemViewModel))
-            {
-                this.ViewModel = (ViewModels.TodoItemViewModel)(e.Parameter);
-            }
-
             if(e.NavigationMode == NavigationMode.New)
             {
                 ApplicationData.Current.LocalSettings.Values.Remove("newpage");
@@ -53,7 +47,7 @@ namespace Todos
                     title_MainPage.Text = (string)composite["title"];
                     description_MainPage.Text = (string)composite["description"];
                     DatePicker_MainPage.Date = (DateTimeOffset)composite["date"];
-                    image_MainPage.Source = new BitmapImage(new Uri("ms-appx://homework/"+(string)composite["image_uri"]));
+                    image_MainPage.Source = new BitmapImage(new Uri("ms-appx://homework"+(string)composite["image_uri"]));
                 }
             }
         }
@@ -67,7 +61,14 @@ namespace Todos
                 composite["title"] = title_MainPage.Text;
                 composite["description"] = description_MainPage.Text;
                 composite["date"] = DatePicker_MainPage.Date;
-                composite["image_uri"] = image_MainPage.Source;
+
+
+                BitmapImage bitmap = image_MainPage.Source as BitmapImage;
+                if (bitmap.UriSource == null)
+                {
+                    bitmap.UriSource =new Uri("/Assets/star.jpg");
+                }
+                composite["image_uri"] = bitmap.UriSource.AbsolutePath;
                 ApplicationData.Current.LocalSettings.Values["newpage"] = composite;
             }
         }
@@ -76,7 +77,7 @@ namespace Todos
         {
             ViewModel.SelectedItem = (Models.TodoItem)(e.ClickedItem);
             if (AnotherGrid.Visibility == Visibility.Collapsed)//宽度小于800
-                Frame.Navigate(typeof(NewPage), ViewModel);
+                Frame.Navigate(typeof(NewPage));
             else
             {
                 CreateButton.Content = "Update";
@@ -91,7 +92,7 @@ namespace Todos
         {
             ViewModel.SelectedItem = null;
             if (AnotherGrid.Visibility == Visibility.Collapsed)
-                Frame.Navigate(typeof(NewPage), ViewModel);
+                Frame.Navigate(typeof(NewPage));
         }
 
         private void Delete_Click(object sender, RoutedEventArgs e)
@@ -107,7 +108,7 @@ namespace Todos
             var datacontext = (sender as FrameworkElement).DataContext;
             var item = ToDoListView.ContainerFromItem(datacontext) as ListViewItem;
             ViewModel.SelectedItem = (Models.TodoItem)(item.Content);
-            Frame.Navigate(typeof(NewPage), ViewModel);
+            Frame.Navigate(typeof(NewPage));
         }
 
 
@@ -121,7 +122,7 @@ namespace Todos
 
         private void CheckBox_check(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(MainPage), ViewModel);
+            Frame.Navigate(typeof(MainPage));
         }
 
         private void UpdateButton_Clicked(object sender, RoutedEventArgs e)
@@ -247,7 +248,7 @@ namespace Todos
                     UpdateButton_Clicked(sender, e);
                 }
             }
-            Frame.Navigate(typeof(MainPage), ViewModel);
+            Frame.Navigate(typeof(MainPage));
         }
         private async void SelectButton_Clicked(object sender, RoutedEventArgs e)
         {
@@ -260,17 +261,34 @@ namespace Todos
             picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
 
             StorageFile file = await picker.PickSingleFileAsync();
-
+            Uri path = new Uri(file.Path);
+            BitmapImage bitmap = new BitmapImage();
+            bitmap.UriSource = transfer_Uri(path.AbsoluteUri);
+            if (bitmap.UriSource == null)
+                bitmap.UriSource = new Uri("ms-appx:///Assets/star.jpg");
+            bitmapCache = bitmap;
+            image_MainPage.Source = bitmap;
+            /*
             if (file != null)
             {
                 // Load the selected picture
                 IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
-                BitmapImage bitmap = new BitmapImage();
+
                 await bitmap.SetSourceAsync(stream);
-                bitmapCache = bitmap;
-                image_MainPage.Source = bitmap;
-            }
+
+
+
+            }*/
         }
 
+        public Uri transfer_Uri(string uri)
+        {
+            int index = uri.IndexOf("Assets");
+            if (index == -1)
+                return null;
+            string ans = "ms-appx:///" + uri.Substring(index);
+            return new Uri(ans);
+        }
+        
     }
 }

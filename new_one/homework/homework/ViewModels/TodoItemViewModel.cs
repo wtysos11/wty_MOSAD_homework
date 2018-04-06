@@ -11,6 +11,17 @@ namespace Todos.ViewModels
         private Models.TodoItem selectedItem;
         public Models.TodoItem SelectedItem { get { return selectedItem; } set { this.selectedItem = value; } }
 
+        private static TodoItemViewModel _instance;
+        public static TodoItemViewModel getInstance()
+        {
+            if(_instance == null)
+            {
+                _instance = new TodoItemViewModel();
+            }
+
+            return _instance;
+        }
+
         public TodoItemViewModel()
         {
             this.allItems.Add(new Models.TodoItem("test1", "just test1", "2018/4/29", null));
