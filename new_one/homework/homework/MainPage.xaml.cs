@@ -33,7 +33,7 @@ namespace Todos
         ViewModels.TodoItemViewModel ViewModel;
         public BitmapImage bitmapCache;
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        async protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             if(e.NavigationMode == NavigationMode.New)
             {
@@ -48,15 +48,24 @@ namespace Todos
                     description_MainPage.Text = (string)composite["description"];
                     DatePicker_MainPage.Date = (DateTimeOffset)composite["date"];
                     image_MainPage.Source = new BitmapImage(new Uri("ms-appx://homework"+(string)composite["image_uri"]));
+
+                    Windows.Storage.StorageFolder localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+                    StorageFile file = await localFolder.GetFileAsync("dataFile.txt");
+                    String format = await FileIO.ReadTextAsync(file);
+                    for(int i = 0;i<format.Length;i++)
+                    {
+                        ViewModel.AllItems[i].setComplete((int)format[i]-48);
+                    }
                 }
             }
         }
-        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        async protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             bool suspending = ((App)App.Current).isSuspend;
             if (suspending)
             {
                 ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
+                Windows.Storage.StorageFolder localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
                 //保存多项配置
                 composite["title"] = title_MainPage.Text;
                 composite["description"] = description_MainPage.Text;
@@ -70,6 +79,15 @@ namespace Todos
                 }
                 composite["image_uri"] = bitmap.UriSource.AbsolutePath;
                 ApplicationData.Current.LocalSettings.Values["newpage"] = composite;
+
+                string format = "";
+                foreach(Models.TodoItem todo in ViewModel.AllItems)
+                {
+                    format += todo.completedLine;
+                }
+
+                StorageFile file = await localFolder.CreateFileAsync("dataFile.txt", CreationCollisionOption.ReplaceExisting);
+                await FileIO.WriteTextAsync(file, format);
             }
         }
 

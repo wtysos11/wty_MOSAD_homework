@@ -27,6 +27,14 @@ namespace Todos.Models
             get { if (isCompleted == true) return 1; else return 0; }
         }
 
+        public void setComplete(int i)
+        {
+            if (i == 1)
+                isCompleted = true;
+            else
+                isCompleted = false;
+        }
+
         public void SetTime(string time)
         {
             DateTimeFormatInfo dateFormat = new DateTimeFormatInfo();
