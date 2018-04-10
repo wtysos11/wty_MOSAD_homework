@@ -11,6 +11,7 @@ namespace Todos.ViewModels
         private Models.TodoItem selectedItem;
         public Models.TodoItem SelectedItem { get { return selectedItem; } set { this.selectedItem = value; } }
 
+        public bool first = false;
         private static TodoItemViewModel _instance;
         public static TodoItemViewModel getInstance()
         {
