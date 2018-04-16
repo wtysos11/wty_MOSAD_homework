@@ -54,7 +54,7 @@ namespace Todos
                     title.Text = (string)composite["title"];
                     description.Text = (string)composite["description"];
                     DatePicker.Date = (DateTimeOffset)composite["date"];
-                    StarPic.Source = new BitmapImage(new Uri("ms-appx://homework/" + (string)composite["image_uri"]));
+                    StarPic.Source = new BitmapImage(new Uri((string)composite["image_uri"]));
                 }
             }
         }
@@ -69,7 +69,13 @@ namespace Todos
                 composite["title"] = title.Text;
                 composite["description"] = description.Text;
                 composite["date"] = DatePicker.Date;
-                composite["image_uri"] = StarPic.Source;
+
+                BitmapImage bitmap = StarPic.Source as BitmapImage;
+                if (bitmap.UriSource == null)
+                {
+                    bitmap.UriSource = new Uri("/Assets/star.jpg");
+                }
+                composite["image_uri"] = bitmap.UriSource.ToString();
                 ApplicationData.Current.LocalSettings.Values["newpage"] = composite;
             }
         }
@@ -217,7 +223,7 @@ namespace Todos
             description.Text = String.Empty;
             DatePicker.Date = DateTimeOffset.Now;
         }
-
+        /*
         private async void SelectButton_Clicked(object sender, RoutedEventArgs e)
         {
             FileOpenPicker picker = new FileOpenPicker();
@@ -239,6 +245,47 @@ namespace Todos
                 bitmapCache = bitmap;
                 StarPic.Source = bitmap;
             }
+        }*/
+        private async void SelectButton_Clicked(object sender, RoutedEventArgs e)
+        {
+            FileOpenPicker picker = new FileOpenPicker();
+            // Initialize the picture file type to take
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+            picker.FileTypeFilter.Add(".png");
+            picker.FileTypeFilter.Add(".bmp");
+            picker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+
+            StorageFile file = await picker.PickSingleFileAsync();
+            if (file == null)
+                return;
+
+            Uri path = new Uri(file.Path);
+            BitmapImage bitmap = new BitmapImage();
+            bitmap.UriSource = transfer_Uri(path.AbsoluteUri);
+            if (bitmap.UriSource == null)
+                bitmap.UriSource = new Uri("ms-appx:///Assets/star.jpg");
+            bitmapCache = bitmap;
+            StarPic.Source = bitmap;
+            /*
+            if (file != null)
+            {
+                // Load the selected picture
+                IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read);
+
+                await bitmap.SetSourceAsync(stream);
+
+
+
+            }*/
+        }
+        public Uri transfer_Uri(string uri)
+        {
+            int index = uri.IndexOf("Assets");
+            if (index == -1)
+                return null;
+            string ans = "ms-appx:///" + uri.Substring(index);
+            return new Uri(ans);
         }
     }
 }
