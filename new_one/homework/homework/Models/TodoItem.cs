@@ -11,6 +11,10 @@ namespace Todos.Models
         private bool isCompleted;
 
         public string GetId() { return id; }
+        public void setID(string _id)
+        {
+            this.id = _id;
+        }
         public string title { get; set; }
         public string description { get; set; }
         public DateTime time { get; set; }
@@ -46,6 +50,22 @@ namespace Todos.Models
         public TodoItem(string title, string description, string time, BitmapImage bitmap)
         {
             this.id = Guid.NewGuid().ToString(); //生成id
+            this.title = title;
+            this.description = description;
+            if (bitmap == null)
+            {
+                this.bitmap = new BitmapImage(new Uri("ms-appx:///Assets/star.jpg"));
+            }
+            else
+            {
+                this.bitmap = bitmap;
+            }
+            SetTime(time);
+            this.isCompleted = false; //默认为未完成
+        }
+        public TodoItem(string id,string title, string description, string time, BitmapImage bitmap)
+        {
+            this.id = id; //生成id
             this.title = title;
             this.description = description;
             if (bitmap == null)
