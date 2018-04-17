@@ -40,6 +40,17 @@ namespace Todos
 
             TileUpdateManager.CreateTileUpdaterForApplication().EnableNotificationQueue(true);
             ViewModel.first = true;
+            /*
+             数据库内信息设置磁贴
+             */
+            foreach(Models.TodoItem item in ViewModel.AllItems)
+            {
+                TileContent content = this.getXMLContent(item.title, item.description);
+                TileNotification notification = new TileNotification(content.GetXml());
+                notification.ExpirationTime = DateTimeOffset.UtcNow.AddMinutes(1);
+                TileUpdateManager.CreateTileUpdaterForApplication().Update(notification);
+            }
+
         }
 
         ViewModels.TodoItemViewModel ViewModel;
