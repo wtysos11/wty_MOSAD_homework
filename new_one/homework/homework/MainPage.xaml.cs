@@ -20,6 +20,8 @@ using Windows.UI.Notifications;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Windows.Data.Xml.Dom;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.UI.Popups;
+
 namespace Todos
 {
     public sealed partial class MainPage : Page
@@ -187,9 +189,10 @@ namespace Todos
 
         private void UpdateButton_Clicked(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedItem != null)
+            if (ViewModel.SelectedItem != null) 
             {
-                ViewModel.UpdateTodoItem(DatePicker_MainPage.Date.ToString(), title_MainPage.Text, description_MainPage.Text);
+                BitmapImage bitmap = image_MainPage.Source as BitmapImage;
+                ViewModel.UpdateTodoItem(DatePicker_MainPage.Date.ToString(), title_MainPage.Text, description_MainPage.Text, bitmap.UriSource.ToString());
             }
         }
 
@@ -349,7 +352,15 @@ namespace Todos
 
             }*/
         }
+        private void SearchButton_Clicked(object sender, RoutedEventArgs e)
+        {
+            string ans = ViewModel.searchString(SearchBox.Text);
+            if(ans!="")
+            {
+                var button = new MessageDialog(ans).ShowAsync();
+            }
 
+        }
         public Uri transfer_Uri(string uri)
         {
             int index = uri.IndexOf("Assets");

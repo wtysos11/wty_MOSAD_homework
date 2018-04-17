@@ -212,7 +212,8 @@ namespace Todos
         {
             if (ViewModel.SelectedItem != null)
             {
-                ViewModel.UpdateTodoItem(DatePicker.Date.ToString(), title.Text, description.Text);
+                BitmapImage bitmap = StarPic.Source as BitmapImage;
+                ViewModel.UpdateTodoItem(DatePicker.Date.ToString(), title.Text, description.Text,bitmap.UriSource.ToString());
                 Frame.Navigate(typeof(MainPage));
             }
         }

@@ -3,6 +3,8 @@ using Windows.UI.Xaml.Media.Imaging;
 using SQLitePCL;
 using System.Globalization;
 using System;
+using System.Text;
+using System.Collections.Generic;
 
 namespace Todos.ViewModels
 {
@@ -15,6 +17,7 @@ namespace Todos.ViewModels
         private Models.TodoItem selectedItem;
         public Models.TodoItem SelectedItem { get { return selectedItem; } set { this.selectedItem = value; } }
 
+        public Dictionary<String,StringBuilder> storageString;//标识符为id
         public bool first = false;
         private static TodoItemViewModel _instance;
         public static TodoItemViewModel getInstance()
@@ -30,7 +33,8 @@ namespace Todos.ViewModels
         public TodoItemViewModel()
         {
             conn = new SQLiteConnection("demo.db");
-            using (var statement = conn.Prepare("CREATE TABLE IF NOT EXISTS todolist (id CHAR(36),title VARCHAR(255),description VARCHAR(255),deadline DATE, PRIMARY KEY (id));"))
+            storageString = new Dictionary<string, StringBuilder>();
+            using (var statement = conn.Prepare("CREATE TABLE IF NOT EXISTS todolist (id CHAR(36),title VARCHAR(255),description VARCHAR(255),deadline DATE,graph VARCHAR(255), PRIMARY KEY (id));"))
             {
                 statement.Step();
             }
@@ -38,7 +42,9 @@ namespace Todos.ViewModels
             {
                 while (statement.Step() == SQLiteResult.ROW)
                 {
-                    Models.TodoItem item = new Models.TodoItem((string)statement[0], (string)statement[1], (string)statement[2], (string)statement[3], null);
+                    BitmapImage bitmap = new BitmapImage(new Uri((string)statement[4]));
+                    Models.TodoItem item = new Models.TodoItem((string)statement[0], (string)statement[1], (string)statement[2], (string)statement[3],bitmap);
+                    storageString.Add(item.GetId(), item.getStringBuilder());
                     this.allItems.Add(item);
                 }
             }
@@ -49,7 +55,8 @@ namespace Todos.ViewModels
             
             this.allItems.Add(new Models.TodoItem(title, description, time, bitmap));
             Models.TodoItem item = allItems[allItems.Count - 1];
-            using (var statement = conn.Prepare("INSERT INTO todolist VALUES(?,?,?,?)"))
+            storageString.Add(item.GetId(), item.getStringBuilder());
+            using (var statement = conn.Prepare("INSERT INTO todolist VALUES(?,?,?,?,?)"))
             {
                 statement.Bind(1, item.GetId());
                 statement.Bind(2, item.title);
@@ -59,12 +66,14 @@ namespace Todos.ViewModels
                 dateFormat.ShortDatePattern = "yyyy/MM/dd";
                 DateTime nowTime = Convert.ToDateTime(item.time, dateFormat);
                 statement.Bind(4, nowTime.Year.ToString()+"-"+nowTime.Month.ToString()+"-"+nowTime.Day.ToString());
+                statement.Bind(5, item.getURI());
                 statement.Step();
             }
         }
 
         public void RemoveTodoItem(Models.TodoItem item)
         {
+            storageString.Remove(item.GetId());
             using (var statement = conn.Prepare("DELETE FROM todolist WHERE id = ?;"))
             {
                 statement.Bind(1, item.GetId());
@@ -74,12 +83,13 @@ namespace Todos.ViewModels
             this.selectedItem = null;
         }
 
-        public void UpdateTodoItem(string time, string title, string description)
+        public void UpdateTodoItem(string time, string title, string description,string graph)
         {
             this.selectedItem.title = title;
             this.selectedItem.description = description;
             this.selectedItem.SetTime(time);
-            using (var statement = conn.Prepare("UPDATE todolist SET title = ?,description = ?,deadline = ? WHERE id = ?;"))
+            storageString[this.selectedItem.GetId()] = this.selectedItem.getStringBuilder();
+            using (var statement = conn.Prepare("UPDATE todolist SET title = ?,description = ?,deadline = ?,graph=? WHERE id = ?;"))
             {
                 statement.Bind(1, title);
                 statement.Bind(2, description);
@@ -88,8 +98,9 @@ namespace Todos.ViewModels
                 dateFormat.ShortDatePattern = "yyyy/MM/dd";
                 DateTime nowTime = Convert.ToDateTime(this.selectedItem.time, dateFormat);
                 statement.Bind(3, nowTime.Year.ToString() + "-" + nowTime.Month.ToString() + "-" + nowTime.Day.ToString());
+                statement.Bind(4, graph);
+                statement.Bind(5, this.selectedItem.GetId());
 
-                statement.Bind(4, this.selectedItem.GetId());
                 statement.Step();
             }
 
@@ -100,9 +111,18 @@ namespace Todos.ViewModels
         {
             this.selectedItem.bitmap = otherBitmap;
         }
-        public SQLiteConnection getSQLDB()
+        public string searchString(string searchText)
         {
-            return conn;
+            StringBuilder ans = new StringBuilder();
+            foreach(StringBuilder sb in storageString.Values)
+            {
+                string searchOrigin = sb.ToString();
+                if(searchOrigin.Contains(searchText))
+                {
+                    ans.Append(searchOrigin+"\n");
+                }
+            }
+            return ans.ToString();
         }
     }
 }

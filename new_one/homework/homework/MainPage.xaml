@@ -57,13 +57,18 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Name="textBlock" Grid.Row="0" Text="Todos" Style="{StaticResource header}"/>
+        <RelativePanel Grid.Row="0">
+            <TextBlock Name="textBlock" Text="Todos" Style="{StaticResource header}"/>
+            <TextBox Name="SearchBox"  Width="200" Height="50" RelativePanel.LeftOf="SearchButton" Margin="0,0,50,0"/>
+            <Button Name="SearchButton" Content="Search" Width="70" Height="50" RelativePanel.AlignRightWithPanel="True" Margin="0,0,100,0" Click="SearchButton_Clicked"/>
+        </RelativePanel>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="73*"/>
+                <ColumnDefinition Width="177*"/>
+                <ColumnDefinition Width="250*"/>
             </Grid.ColumnDefinitions>
-            <ListView IsItemClickEnabled="True" Name="todoListviewBegin" ItemClick="TodoItem_ItemClicked" ItemsSource="{x:Bind ViewModel.AllItems}">
+            <ListView IsItemClickEnabled="True" Name="todoListviewBegin" ItemClick="TodoItem_ItemClicked" ItemsSource="{x:Bind ViewModel.AllItems}" Grid.ColumnSpan="2">
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="md:TodoItem">
                         <Grid Height="100">
@@ -80,7 +85,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <ListView IsItemClickEnabled="True" Name="ToDoListView" ItemClick="TodoItem_ItemClicked" ItemsSource="{x:Bind ViewModel.AllItems}">
+            <ListView IsItemClickEnabled="True" Name="ToDoListView" ItemClick="TodoItem_ItemClicked" ItemsSource="{x:Bind ViewModel.AllItems}" Grid.ColumnSpan="2">
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="md:TodoItem">
                         <Grid Height="100">
@@ -107,7 +112,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Grid Name="AnotherGrid" Grid.Column="1" >
+            <Grid Name="AnotherGrid" Grid.Column="2" >
                 <ScrollViewer Margin="20">
                     <StackPanel>
                         <Image Name="image_MainPage" Width="380" Height="180" Margin="4" RenderTransformOrigin="0.5,0.5" Source="Assets/star.jpg">
