@@ -99,18 +99,24 @@ namespace Week7
                 System.IO.Stream readResponseStream = response.GetResponseStream();
                 using (System.IO.StreamReader reader = new System.IO.StreamReader(readResponseStream))
                 {
+                    StringBuilder returnString=new StringBuilder();
                     string xmlText = reader.ReadToEnd();
                     XmlDocument doc = new XmlDocument();
                     doc.LoadXml(xmlText);
 
                     XmlNodeList listNodes = null;
                     listNodes = doc.DocumentElement.ChildNodes;
-                    foreach(XmlElement node in listNodes)
-                    {
 
+                    //拿到第二个标签（result）的元素
+                    XmlElement result = listNodes.Item(1) as XmlElement;
+                    XmlNodeList list = null;
+                    list = result.ChildNodes;
+                    foreach(XmlElement node in list)
+                    {
+                        returnString.Append(node.TagName + ": " + node.InnerText + "\n");
                     }
 
-                    Telphone_result.Text = xmlText.ToString();
+                    Telphone_result.Text = returnString.ToString();
                 }
             }
             catch (System.Exception ex)
