@@ -52,7 +52,8 @@ namespace Week7
         public string getCellphoneURL(string number)
         {
             //api具体信息https://www.nowapi.com/?app=intf.appkey
-            return "http://api.k780.com/?app=phone.get&phone=" + number.Trim() + "&appkey=33131&sign=d6470330f3812ebeb06483b1336fdd77&format=xml";
+            return "http://api.k780.com/?app=idcard.get&idcard=" + number.Trim() + "&appkey=33131&sign=d6470330f3812ebeb06483b1336fdd77&format=xml";
+            //return "http://api.k780.com/?app=phone.get&phone=" + number.Trim() + "&appkey=33131&sign=d6470330f3812ebeb06483b1336fdd77&format=xml";
         }
 
         //使用get方法来请求具体位置Location的天气信息
@@ -122,7 +123,7 @@ namespace Week7
             catch (System.Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
-                Weather_result.Text = ex.Message;
+                Telphone_result.Text = ex.Message;
             }
         }
     }

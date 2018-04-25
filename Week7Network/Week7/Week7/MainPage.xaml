@@ -15,6 +15,6 @@
         <TextBlock Name="Weather_result" HorizontalAlignment="Left" Margin="222,254,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Height="325" Width="255"/>
         <TextBlock Name="Telphone_result" HorizontalAlignment="Left" Margin="637,254,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Height="325" Width="255"/>
         <TextBlock HorizontalAlignment="Left" Margin="221,153,0,0" Text="输入城市查询当前天气" TextWrapping="Wrap" VerticalAlignment="Top" Height="38" Width="200" FontSize="20"/>
-        <TextBlock HorizontalAlignment="Left" Margin="637,153,0,0" Text="输入手机查询归属地" TextWrapping="Wrap" VerticalAlignment="Top" Height="38" Width="200" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Left" Margin="637,153,0,0" Text="输入身份证查询归属地" TextWrapping="Wrap" VerticalAlignment="Top" Height="38" Width="200" FontSize="20"/>
     </Grid>
 </Page>
