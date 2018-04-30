@@ -11,7 +11,7 @@
         <TextBox Name="Weather_text" HorizontalAlignment="Left" Margin="221,198,0,0" Text="" VerticalAlignment="Top" Height="38" Width="196"/>
         <Button Name="Weather_button" Content="查询天气" HorizontalAlignment="Left" Margin="453,198,0,0" VerticalAlignment="Top" Height="38" Width="100" Click="Weather_button_Click"/>
         <TextBox x:Name="Telphone_text" HorizontalAlignment="Left" Margin="637,198,0,0" Text="" VerticalAlignment="Top" Height="38" Width="196"/>
-        <Button x:Name="Telphone_button" Content="查询手机" HorizontalAlignment="Left" Margin="869,198,0,0" VerticalAlignment="Top" Height="38" Width="100" Click="TextBlock_SelectionChanged"/>
+        <Button x:Name="Telphone_button" Content="查询身份证" HorizontalAlignment="Left" Margin="869,198,0,0" VerticalAlignment="Top" Height="38" Width="100" Click="TextBlock_SelectionChanged"/>
         <TextBlock Name="Weather_result" HorizontalAlignment="Left" Margin="222,254,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Height="325" Width="255"/>
         <TextBlock Name="Telphone_result" HorizontalAlignment="Left" Margin="637,254,0,0" Text="" TextWrapping="Wrap" VerticalAlignment="Top" Height="325" Width="255"/>
         <TextBlock HorizontalAlignment="Left" Margin="221,153,0,0" Text="输入城市查询当前天气" TextWrapping="Wrap" VerticalAlignment="Top" Height="38" Width="200" FontSize="20"/>
