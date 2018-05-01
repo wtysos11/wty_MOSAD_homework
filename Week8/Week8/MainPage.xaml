@@ -20,7 +20,7 @@
             <AppBarButton Icon="FullScreen" Label="FullScreen" Click="media_FullScreen"/>
             <AppBarButton Icon="Page" Label="Page" Click="media_Video"/>
             <AppBarButton Icon="Add" Label="Add" Click="media_Add"/>
-            <AppBarButton Icon="Volume" Label="Volume"/>
+            <AppBarButton Icon="Volume" Label="Volume" Click="media_Volume"/>
         </CommandBar>
     </Page.BottomAppBar>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -29,19 +29,48 @@
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="1">
+            
+                <Ellipse Name="media_poster"
+                     Height="400"
+                     Width="400"
+                     Margin="50,150,50,0"
+                     RenderTransformOrigin="0.5,0.5">
+                <Ellipse.Fill>
+                    <ImageBrush ImageSource="Assets/poster.jpg"/>
+                </Ellipse.Fill>
+                <Ellipse.RenderTransform>
+                    <RotateTransform x:Name="poster_rotate"/>
+                </Ellipse.RenderTransform>
+                <Ellipse.Resources>
+                    <Storyboard x:Name="myStoryboard" RepeatBehavior="Forever">
+                                <DoubleAnimation
+                                    Storyboard.TargetName="poster_rotate"
+                                    Storyboard.TargetProperty="Angle"
+                                    To="360" Duration="0:0:20"/>
+                    </Storyboard>
+                </Ellipse.Resources>
+            </Ellipse>
             <MediaElement x:Name="mediaPlayer" 
                           AutoPlay="False" 
                           Source="Assets/Music/梶浦由記 - Sis puella magica!.mp3"
                           AreTransportControlsEnabled="False" 
                           MediaOpened="media_MediaOpened"
                           PosterSource="Assets/poster.jpg"
-                          Height="400"
-                          Width="400"
-                          Margin="50,150,50,0"
+                          Height="0"
+                          Width="0"
                           />
                 <Slider x:Name="mediaPlayerSlider" 
                         Value="{Binding ElementName=mediaPlayer,Path=Position,Converter={StaticResource mc},Mode=TwoWay}"
-                        Margin="100"/>
+                        Margin="200,100,200,20"/>
+            <StackPanel Name="volumeControl" Opacity="0" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,20,0">
+                <TextBlock Name="volumeText" FontSize="20" VerticalAlignment="Center" Margin="5" Height="30" Width="100">Volume</TextBlock>
+                <Slider Name="volumeSlider" 
+                        VerticalAlignment="Center" 
+                        ValueChanged="ChangeMediaVolume" 
+                        StepFrequency="0.1"
+                        Orientation="Horizontal"
+           Minimum="0" Maximum="1" Value="0.5" Width="100"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Page>
