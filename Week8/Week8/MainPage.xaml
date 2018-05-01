@@ -5,31 +5,43 @@
     xmlns:local="using:Week8"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:cvt="using:Week8"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <cvt:MusicConverter x:Key="mc"/>
+    </Page.Resources>
+    
     <Page.BottomAppBar>
         <CommandBar>
-            <AppBarButton Icon="Play" Label="Play"/>
-            <AppBarButton Icon="Pause" Label="Pause"/>
-            <AppBarButton Icon="Stop" Label="Stop"/>
-            <AppBarButton Icon="FullScreen" Label="FullScreen"/>
-            <AppBarButton Icon="Page" Label="Page"/>
+            <AppBarButton Icon="Play" Label="Play" Click="media_Play"/>
+            <AppBarButton Icon="Pause" Label="Pause" Click="media_Pause"/>
+            <AppBarButton Icon="Stop" Label="Stop" Click="media_Stop"/>
+            <AppBarButton Icon="FullScreen" Label="FullScreen" Click="media_FullScreen"/>
+            <AppBarButton Icon="Page" Label="Page" Click="media_Video"/>
+            <AppBarButton Icon="Add" Label="Add" Click="media_Add"/>
             <AppBarButton Icon="Volume" Label="Volume"/>
         </CommandBar>
     </Page.BottomAppBar>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="1">
             <MediaElement x:Name="mediaPlayer" 
                           AutoPlay="False" 
                           Source="Assets/Music/梶浦由記 - Sis puella magica!.mp3"
-                          PosterSource="Assets/poster.jpg" 
                           AreTransportControlsEnabled="False" 
-                          Margin="50,100,50,100"/>
-            <Slider x:Name="mediaPlayerSlider" Margin="50"/>
+                          MediaOpened="media_MediaOpened"
+                          PosterSource="Assets/poster.jpg"
+                          Height="400"
+                          Width="400"
+                          Margin="50,150,50,0"
+                          />
+                <Slider x:Name="mediaPlayerSlider" 
+                        Value="{Binding ElementName=mediaPlayer,Path=Position,Converter={StaticResource mc},Mode=TwoWay}"
+                        Margin="100"/>
         </StackPanel>
     </Grid>
 </Page>
