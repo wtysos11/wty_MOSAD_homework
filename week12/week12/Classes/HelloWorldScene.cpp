@@ -1,7 +1,9 @@
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
+#include "Monster.h"
 #include <cstdio>
 #include <string>
+#include <cmath>
 #pragma execution_character_set("utf-8")
 
 USING_NS_CC;
@@ -31,6 +33,15 @@ bool HelloWorld::init()
     visibleSize = Director::getInstance()->getVisibleSize();
     origin = Director::getInstance()->getVisibleOrigin();
 
+	//加载地图
+	/*
+	TMXTiledMap* tmx = TMXTiledMap::create("map.tmx");
+	tmx->setPosition(visibleSize.width / 2, visibleSize.height / 2);
+	tmx->setAnchorPoint(Vec2(0.5, 0.5));
+	tmx->setScale(Director::getInstance()->getContentScaleFactor());
+	this->addChild(tmx, 0);
+	*/
+
 	//创建一张贴图
 	auto texture = Director::getInstance()->getTextureCache()->addImage("$lucia_2.png");
 	//从贴图中以像素单位切割，创建关键帧
@@ -40,6 +51,24 @@ bool HelloWorld::init()
 	player->setPosition(Vec2(origin.x + visibleSize.width / 2,
 		origin.y + visibleSize.height / 2));
 	addChild(player, 3);
+
+	for (unsigned int i = 0; i < 15; i++)
+	{
+		auto fac = Factory::getInstance();
+		
+		float x = random(origin.x, visibleSize.width);
+		float y = random(origin.y, visibleSize.height);
+		//随机点离角色太近，跳掉
+		if (fabs(x - player->getPositionX()) < 10 || fabs(y - player->getPositionY()) < 10)
+		{
+			i--;
+			continue;
+		}
+		auto monster = fac->createMonster();
+		monster->setPosition(x, y);
+		addChild(monster, 3);
+
+	}
 
 	//hp条
 	Sprite* sp0 = Sprite::create("hp.png", CC_RECT_PIXELS_TO_POINTS(Rect(0, 320, 420, 47)));
@@ -102,6 +131,7 @@ bool HelloWorld::init()
 	
 	auto itemlabel = Label::createWithTTF("W", "fonts/arial.ttf", 36);
 	auto moveForward = MenuItemLabel::create(itemlabel, [&](cocos2d::Ref* pSender) {
+		cid = 'W';
 		Animation *runAnimation = Animation::createWithSpriteFrames(run);
 		runAnimation->setDelayPerUnit(0.05f);
 		Animate* running = Animate::create(runAnimation);
@@ -120,6 +150,7 @@ bool HelloWorld::init()
 
 	itemlabel = Label::createWithTTF("S", "fonts/arial.ttf", 36);
 	auto moveBackward = MenuItemLabel::create(itemlabel, [&](cocos2d::Ref* pSender) {
+		cid = 'S';
 		Animation *runAnimation = Animation::createWithSpriteFrames(run);
 		runAnimation->setDelayPerUnit(0.05f);
 		Animate* running = Animate::create(runAnimation);
@@ -138,6 +169,7 @@ bool HelloWorld::init()
 
 	itemlabel = Label::createWithTTF("A", "fonts/arial.ttf", 36);
 	auto moveLeft = MenuItemLabel::create(itemlabel, [&](cocos2d::Ref* pSender) {
+		cid = 'A';
 		Animation *runAnimation = Animation::createWithSpriteFrames(run);
 		runAnimation->setDelayPerUnit(0.05f);
 		Animate* running = Animate::create(runAnimation);
@@ -156,6 +188,7 @@ bool HelloWorld::init()
 
 	itemlabel = Label::createWithTTF("D", "fonts/arial.ttf", 36);
 	auto moveRight = MenuItemLabel::create(itemlabel, [&](cocos2d::Ref* pSender) {
+		cid = 'D';
 		Animation *runAnimation = Animation::createWithSpriteFrames(run);
 		runAnimation->setDelayPerUnit(0.05f);
 		Animate* running = Animate::create(runAnimation);
@@ -203,11 +236,24 @@ bool HelloWorld::init()
 			Animation *attackAnimation = Animation::createWithSpriteFrames(attack);
 			attackAnimation->setDelayPerUnit(0.1f);
 			Animate* attacking = Animate::create(attackAnimation);
+
+			auto factory = Factory::getInstance();
+			Rect playerRect = player->getBoundingBox();
+			Rect attackRect = Rect(playerRect.getMinX() - 40, playerRect.getMinY(), playerRect.getMaxX() - playerRect.getMinX() + 80, playerRect.getMaxY() - playerRect.getMinY());
+			auto atkMonster = factory->collider(attackRect);
+			if (atkMonster != NULL)
+			{
+				factory->removeMonster(atkMonster);
+			}
+
 			player->runAction(Sequence::create(attacking, CallFunc::create([&]() {
 				actioning = false;
 			}), nullptr));
 			pT->setPercentage(pT->getPercentage() + 10);
 			actioning = true;
+
+
+
 		}
 	});
 	attackAnimate->setPosition(origin.x + visibleSize.width - 70, 50);
@@ -222,22 +268,26 @@ bool HelloWorld::init()
 	time->setPosition(origin.x + visibleSize.width / 2 , origin.y + visibleSize.height - 30);
 	this->addChild(time);
 	schedule(schedule_selector(HelloWorld::updateCounter), 1.0f, 150, 0);
+	schedule(schedule_selector(HelloWorld::hitByMonster), 0.2f, 750, 0);
+
+
 
     return true; 
 }
-/*
-void HelloWorld::goForward(cocos2d::Ref* pSender)
-{
-	Animation *runAnimation = Animation::createWithSpriteFrames(run);
-	runAnimation->setDelayPerUnit(0.03f);
-	Animate* running = Animate::create(runAnimation);
-
-	player->runAction(Spawn::create(MoveBy::create(0.133f,Vec2(0,40)),running,nullptr));
-}*/
-
 
 void HelloWorld::updateCounter(float dt)
 {
 	dtime--;
 	time->setString(std::to_string(dtime));
+}
+
+void HelloWorld::hitByMonster(float dt)
+{
+	auto factory = Factory::getInstance();
+	Sprite* collision = factory->collider(player->getBoundingBox());//collision为碰撞到主角的怪物
+	if (collision != NULL)
+	{
+		factory->removeMonster(collision);//移除怪物对象
+		pT->setPercentage(pT->getPercentage() - 10);//人物血条下降
+	}
 }

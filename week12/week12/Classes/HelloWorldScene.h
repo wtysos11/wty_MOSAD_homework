@@ -9,6 +9,7 @@ public:
 
     virtual bool init();
 	void updateCounter(float dt);
+	void hitByMonster(float dt);
 	//void goForward(cocos2d::Ref* pSender);
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
@@ -24,4 +25,7 @@ private:
 	cocos2d::Label* time;
 	int dtime;
 	cocos2d::ProgressTimer* pT;
+
+	char cid;
+	char lastCid;
 };
