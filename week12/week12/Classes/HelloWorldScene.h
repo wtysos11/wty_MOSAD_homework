@@ -10,6 +10,7 @@ public:
     virtual bool init();
 	void updateCounter(float dt);
 	void hitByMonster(float dt);
+	void monsterChase(float dt);
 	//void goForward(cocos2d::Ref* pSender);
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
@@ -23,9 +24,11 @@ private:
 	cocos2d::Size visibleSize;
 	cocos2d::Vec2 origin;
 	cocos2d::Label* time;
+	cocos2d::Label* kill;
 	int dtime;
 	cocos2d::ProgressTimer* pT;
-
+	bool deadState;
 	char cid;
 	char lastCid;
+	int monsterKill;//击杀怪物的数量
 };

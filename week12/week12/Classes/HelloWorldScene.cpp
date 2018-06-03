@@ -42,6 +42,8 @@ bool HelloWorld::init()
 	this->addChild(tmx, 0);
 	*/
 
+	deadState = false;
+	monsterKill = 0;
 	//创建一张贴图
 	auto texture = Director::getInstance()->getTextureCache()->addImage("$lucia_2.png");
 	//从贴图中以像素单位切割，创建关键帧
@@ -93,24 +95,22 @@ bool HelloWorld::init()
 	idle.pushBack(frame0);
 
 	// 攻击动画
-	attack.reserve(18);
+	attack.reserve(17);
 	for (int i = 0; i < 17; i++) {
 		auto frame = SpriteFrame::createWithTexture(texture, CC_RECT_PIXELS_TO_POINTS(Rect(113 * i, 0, 113, 113)));
 		attack.pushBack(frame);
 	}
-	attack.pushBack(frame0);
 
 	// 可以仿照攻击动画
 	// 死亡动画(帧数：22帧，高：90，宽：79）
 	auto texture2 = Director::getInstance()->getTextureCache()->addImage("$lucia_dead.png");
 
-	dead.reserve(23);
+	dead.reserve(22);
 	for (int i = 0; i < 22; i++)
 	{
 		auto frame = SpriteFrame::createWithTexture(texture2, CC_RECT_PIXELS_TO_POINTS(Rect(79 * i, 0, 79, 90)));
 		dead.pushBack(frame);
 	}
-	dead.pushBack(frame0);
 	// 运动动画(帧数：8帧，高：101，宽：68）
 	auto texture3 = Director::getInstance()->getTextureCache()->addImage("$lucia_forward.png");
 	
@@ -131,6 +131,9 @@ bool HelloWorld::init()
 	
 	auto itemlabel = Label::createWithTTF("W", "fonts/arial.ttf", 36);
 	auto moveForward = MenuItemLabel::create(itemlabel, [&](cocos2d::Ref* pSender) {
+		if (deadState)
+			return;
+
 		cid = 'W';
 		Animation *runAnimation = Animation::createWithSpriteFrames(run);
 		runAnimation->setDelayPerUnit(0.05f);
@@ -150,6 +153,9 @@ bool HelloWorld::init()
 
 	itemlabel = Label::createWithTTF("S", "fonts/arial.ttf", 36);
 	auto moveBackward = MenuItemLabel::create(itemlabel, [&](cocos2d::Ref* pSender) {
+		if (deadState)
+			return;
+
 		cid = 'S';
 		Animation *runAnimation = Animation::createWithSpriteFrames(run);
 		runAnimation->setDelayPerUnit(0.05f);
@@ -169,6 +175,9 @@ bool HelloWorld::init()
 
 	itemlabel = Label::createWithTTF("A", "fonts/arial.ttf", 36);
 	auto moveLeft = MenuItemLabel::create(itemlabel, [&](cocos2d::Ref* pSender) {
+		if (deadState)
+			return;
+
 		cid = 'A';
 		Animation *runAnimation = Animation::createWithSpriteFrames(run);
 		runAnimation->setDelayPerUnit(0.05f);
@@ -182,12 +191,20 @@ bool HelloWorld::init()
 			player->runAction(running);
 		}
 
+		if (lastCid != 'A')
+		{
+			player->setFlipX(true);
+		}
+		lastCid = 'A';
 	});
 	moveLeft->setPosition(25, 50);
 	menuItems.pushBack(moveLeft);
 
 	itemlabel = Label::createWithTTF("D", "fonts/arial.ttf", 36);
 	auto moveRight = MenuItemLabel::create(itemlabel, [&](cocos2d::Ref* pSender) {
+		if (deadState)
+			return;
+
 		cid = 'D';
 		Animation *runAnimation = Animation::createWithSpriteFrames(run);
 		runAnimation->setDelayPerUnit(0.05f);
@@ -200,6 +217,12 @@ bool HelloWorld::init()
 		{
 			player->runAction(running);
 		}
+
+		if (lastCid != 'D')
+		{
+			player->setFlipX(false);
+		}
+		lastCid = 'D';
 
 	});
 	moveRight->setPosition(100, 50);
@@ -214,10 +237,11 @@ bool HelloWorld::init()
 	//两个动画
 	itemlabel = Label::createWithTTF("X", "fonts/arial.ttf", 36);
 	auto deadAnimate = MenuItemLabel::create(itemlabel, [&](cocos2d::Ref* pSender) {
-		if (!actioning)
+		if (!actioning && !deadState)
 		{
 			Animation *deadAnimation = Animation::createWithSpriteFrames(dead);
 			deadAnimation->setDelayPerUnit(0.1f);
+			deadAnimation->setRestoreOriginalFrame(true);
 			Animate* dying = Animate::create(deadAnimation);
 			player->runAction(Sequence::create(dying, CallFunc::create([&]() {
 				actioning = false;
@@ -231,10 +255,11 @@ bool HelloWorld::init()
 	
 	itemlabel = Label::createWithTTF("Y", "fonts/arial.ttf", 36);
 	auto attackAnimate = MenuItemLabel::create(itemlabel, [&](cocos2d::Ref* pSender) {
-		if (!actioning)
+		if (!actioning && !deadState)
 		{
 			Animation *attackAnimation = Animation::createWithSpriteFrames(attack);
 			attackAnimation->setDelayPerUnit(0.1f);
+			attackAnimation->setRestoreOriginalFrame(true);
 			Animate* attacking = Animate::create(attackAnimation);
 
 			auto factory = Factory::getInstance();
@@ -244,6 +269,8 @@ bool HelloWorld::init()
 			if (atkMonster != NULL)
 			{
 				factory->removeMonster(atkMonster);
+				monsterKill++;
+				kill->setString(std::to_string(monsterKill));
 			}
 
 			player->runAction(Sequence::create(attacking, CallFunc::create([&]() {
@@ -267,9 +294,13 @@ bool HelloWorld::init()
 	time = Label::createWithTTF(std::to_string(dtime), "fonts/arial.ttf", 36);
 	time->setPosition(origin.x + visibleSize.width / 2 , origin.y + visibleSize.height - 30);
 	this->addChild(time);
+
+	kill = Label::createWithTTF(std::to_string(monsterKill), "fonts/arial.ttf", 36);
+	kill->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - 75);
+	this->addChild(kill);
 	schedule(schedule_selector(HelloWorld::updateCounter), 1.0f, 150, 0);
 	schedule(schedule_selector(HelloWorld::hitByMonster), 0.2f, 750, 0);
-
+	schedule(schedule_selector(HelloWorld::monsterChase), 3.0f, 50, 0);//3s怪物动一次
 
 
     return true; 
@@ -277,10 +308,24 @@ bool HelloWorld::init()
 
 void HelloWorld::updateCounter(float dt)
 {
+	if (deadState)
+	{
+		return;
+	}
 	dtime--;
 	time->setString(std::to_string(dtime));
 }
 
+//怪物追逐
+void HelloWorld::monsterChase(float dt)
+{
+	if (deadState)
+	{
+		return;
+	}
+	auto factory = Factory::getInstance();
+	factory->moveMonster(player->getPosition(), 1.0f);
+}
 void HelloWorld::hitByMonster(float dt)
 {
 	auto factory = Factory::getInstance();
@@ -289,5 +334,18 @@ void HelloWorld::hitByMonster(float dt)
 	{
 		factory->removeMonster(collision);//移除怪物对象
 		pT->setPercentage(pT->getPercentage() - 10);//人物血条下降
+	}
+
+	//死亡
+	if (pT->getPercentage() <= 0 && !deadState)
+	{
+		Animation *deadAnimation = Animation::createWithSpriteFrames(dead);
+		deadAnimation->setDelayPerUnit(0.1f);
+		Animate* dying = Animate::create(deadAnimation);
+		player->runAction(dying);
+		deadState = true;
+		removeChild(time);
+		Label* gameOver = Label::createWithTTF("Game Over!", "fonts/arial.ttf", 36);
+		gameOver->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - 30);
 	}
 }
